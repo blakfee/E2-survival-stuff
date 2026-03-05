@@ -1,0 +1,44 @@
+@name addons/survival/Wood Crate
+@persist Count
+@strict
+@model models/props_junk/wood_crate001a.mdl
+if(first()|duped()){
+    E=entity()
+    propSpawnUndo(0)
+    enableConstraintUndo(0)
+    Stored=array()
+    Max=40
+    E:setName("Wood: "+Count+"/"+Max)
+}
+interval(200)
+findExcludeEntities(Stored)
+findExcludeEntity(E)
+findByClass("prop_*")
+findInSphere(E:toWorld(vec(0,0,E:boxSize():z()/2)),25)
+Targets=findToArray()
+Target=Targets[1,entity]
+foreach(I,V:entity=Targets){
+    if(V:isValidPhysics()){
+        if(Count<Max){
+            if(V:model()=="models/props_docks/dock01_pole01a_128.mdl"|V:model()=="models/props_debris/wood_board05a.mdl"|V:model()=="models/props_debris/wood_board04a.mdl"){
+                Count+=1
+                Stored:insertString(Stored:count(),Target:model())
+                V:propDelete()
+                E:emitSound("physics/cardboard/cardboard_box_impact_hard"+randint(1,7)+".wav")
+            }
+        }
+    }
+}
+if(changed(Count)&Count>0){
+    E:setName("Wood: "+Count+"/"+Max)
+}
+event playerUse(Player:entity, Entity:entity) {
+    if(Entity==E){
+        if(Count>0){
+            Log=propSpawn(Stored[Stored:count(),string],E:toWorld(vec(50,0,20)),E:toWorld(ang()),0)
+            Log:propFreeze(0)
+            E:setName("Wood: "+Count+"/"+Max)
+            Stored:pop()
+        }
+    }
+}

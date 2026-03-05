@@ -1,0 +1,118 @@
+@name Tools/Axe
+@inputs 
+@outputs 
+@persist Smoothing
+@strict
+
+if(first()){
+    Hitcount=0
+    E=entity()
+    TreeHit=0
+    Wood=array()
+    propSpawnUndo(0)
+    Axe=propSpawn("models/props_forest/axe.mdl",E:toWorld(vec(0,0,50)),E:toWorld(ang(0)),1)
+    Axe:setMass(25)
+    runOnTick(1)
+    Treefalling=0
+    Hitsounds=array(
+    "physics/wood/wood_box_impact_bullet1.wav",
+    "physics/wood/wood_box_impact_bullet2.wav",
+    "physics/wood/wood_box_impact_bullet3.wav",
+    "physics/wood/wood_box_impact_bullet4.wav"
+    )
+    #valid trees that can be hit
+    ValidTrees=array(
+    "models/props_foliage/tree_pine04.mdl",
+    "models/props_foliage/tree_pine05.mdl",
+    "models/props_foliage/tree_pine06.mdl",
+    "models/props_foliage/tree_pine_large.mdl",
+    "models/props_foliage/ah_ash_tree001.mdl",
+    "models/props_foliage/ah_ash_tree002.mdl",
+    "models/props_foliage/ah_ash_tree_med.mdl"
+    )
+    MaxHits=randint(3,10)
+}
+
+#hey... this is from my shovel E2!
+if(changed(owner():keyUse())&owner():aimEntity()==Axe){
+    Axe:propFreeze(0)
+}
+if(Axe:isPlayerHolding()){
+    PickedUp=1
+}else{
+    PickedUp=0
+}
+#   :((
+    #ranger... 
+        rangerFilter(players())
+        rangerFilter(Axe)
+        rangerFilter(Wood)
+Ranger=rangerOffset(10,Axe:toWorld(vec(0,-15,0)),Axe:forward())
+
+
+if(PickedUp==1){
+    if(changed(PickedUp)&PickedUp==1){
+        
+    }
+    if(Ranger:distance()<9){
+        TreeHit=1
+    }else{
+        TreeHit=0
+    }
+    if(Treefalling==0){
+        if(changed(TreeHit)&TreeHit==1&Ranger:entity():isValid()){
+            Axe:emitSound(Hitsounds[randint(1,Hitsounds:count()),string])
+            for(Tree = 1,ValidTrees:count(),1){
+                if(Ranger:entity():model()==ValidTrees[Tree,string]){
+                    Hitcount++
+                }
+                
+            }
+        }
+    }
+    if(Hitcount>MaxHits){
+        Hitcount=0
+        MaxHits=randint(3,10)
+        print("Tree Cut!")
+        Ent=Ranger:entity()
+        holoCreate(1,Ent:pos(),vec(1),Ent:angles())
+        holoModel(1,Ent:model())
+        holoClip(1,1,vec(0,0,50),vec(0,0,-90),0)
+        holoClipEnabled(1,1,1)
+        holoCreate(2,Ent:pos(),vec(1),Ent:angles())
+        holoModel(2,Ent:model())
+        holoClip(2,2,vec(0,0,50),vec(0,0,90),0)
+        holoClipEnabled(2,2,1)
+        holoCreate(3,Ent:toWorld(vec(0,13,50)),vec(1),Ent:angles())
+        holoParent(2,3)
+        holoAlpha(3,0)
+        Treefalling=1
+        Ent:propDelete()
+    holoEntity(1):emitSound("physics/wood/wood_box_break2.wav")
+    }
+    
+}
+if(Treefalling){
+        RangerF=rangerOffset(10,holoEntity(2):toWorld(vec(0,0,holoEntity(2):boxSize():z())),vec(0,0,-10))
+        if(RangerF:distance()>9){
+        Smoothing+=0.1
+        Smoothing=clamp(Smoothing,0,1)
+        holoAng(3,holoAng(3)+ang(0,0,-Smoothing))
+        RangerF=rangerOffset(10,holoEntity(2):toWorld(vec(0,0,holoEntity(2):boxSize():z())),vec(0,0,-10))
+        }
+        if(RangerF:distance()<9){
+            if(changed(RangerF:distance())){
+                holoEntity(1):emitSound("physics/wood/wood_plank_break"+randint(1,4)+".wav")
+            }
+            timer("wait",2000)
+            if(clk("wait")){
+                Log=propSpawn("models/props_docks/dock01_pole01a_128.mdl",holoEntity(2):toWorld(vec(0,0,holoEntity(2):boxSize():z()/4)),holoAng(2),0)
+                Log=propSpawn("models/props_docks/dock01_pole01a_128.mdl",holoEntity(2):toWorld(vec(0,0,holoEntity(2):boxSize():z()/2)),holoAng(2),0)
+                holoDelete(1)
+                holoDelete(2)
+                holoDelete(3)
+                Treefalling=0
+            }
+        }
+    }
+

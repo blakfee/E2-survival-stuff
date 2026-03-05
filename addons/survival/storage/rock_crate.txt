@@ -1,0 +1,53 @@
+@name addons/survival/Rock Crate
+@persist Count
+@strict
+@model models/props_junk/wood_crate001a.mdl
+if(first()|duped()){
+    E=entity()
+    propSpawnUndo(0)
+    enableConstraintUndo(0)
+    E:noCollideAll(0)
+    Stored=array()
+    Color=array()
+    Mat=array()
+    Max=40
+    E:setName("Rocks: "+Count+"/"+Max)
+}
+interval(200)
+findExcludeEntities(Stored)
+findExcludeEntity(E)
+findByClass("prop_*")
+findInSphere(E:toWorld(vec(0,0,E:boxSize():z()/2)),25)
+Targets=findToArray()
+Target=Targets[1,entity]
+foreach(I,V:entity=Targets){
+    if(V:isValidPhysics()){
+        if(Count<Max){
+            if(V:model()=="models/props_junk/rock001a.mdl"|V:model()=="models/props_foliage/rock_forest01a.mdl"|V:model()=="models/props_foliage/rock_forest01b.mdl"|V:model()=="models/props_foliage/rock_forest01.mdl"){
+                Count+=1
+                
+                Stored:insertString(Stored:count(),V:model())
+                Color:insertVector(Color:count(),V:getColor())
+                Mat:insertString(Mat:count(),V:getMaterial())
+                V:propDelete()
+                E:emitSound("physics/cardboard/cardboard_box_impact_hard"+randint(1,7)+".wav")
+            }
+        }
+    }
+}
+if(changed(Count)&Count>0){
+    E:setName("Rocks: "+Count+"/"+Max)
+}
+event playerUse(Player:entity, Entity:entity) {
+    if(Entity==E){
+        if(Count>0){
+            Rock=propSpawn(Stored[Stored:count(),string],E:toWorld(vec(50,0,20)),E:toWorld(ang()),0)
+            Rock:propFreeze(0)
+            Rock:setColor(Color[Color:count(),vector])
+            Rock:setMaterial(Mat[Mat:count(),string])
+            Stored:pop()
+            Color:pop()
+            Color:pop()
+        }
+    }
+}

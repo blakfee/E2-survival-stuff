@@ -1,0 +1,124 @@
+@name Tools/Shovel
+@inputs 
+@outputs 
+@persist TouchingGround I
+@strict
+
+#Made by fluffy!
+#Shovel......
+#now dupable
+if(first()|duped()){
+    TimesNeeded=3
+    RocksExclude=array()
+    TimesDigged=0
+    propSpawnUndo(0)
+    E=entity()
+    Shovel=propSpawn("models/props_junk/shovel01a.mdl",E:toWorld(vec(0,0,80)),E:toWorld(ang(0)),1)
+    holoCreate(1,Shovel:toWorld(vec(0,0,-40)))
+    holoParent(1,Shovel)
+    holoAlpha(1,0)
+    runOnTick(1)
+    Digsounds=array("physics/surfaces/sand_impact_bullet1.wav","physics/surfaces/sand_impact_bullet2.wav","physics/surfaces/sand_impact_bullet3.wav","physics/surfaces/sand_impact_bullet4.wav")
+    DirtModels=array(
+    "models/props_junk/rock001a.mdl",
+    "models/props_foliage/rock_forest01a.mdl",
+    "models/props_foliage/rock_forest01b.mdl"
+    )
+}
+        rangerFilter(Shovel)
+        rangerFilter(players())
+        rangerFilter(RocksExclude)
+Ranger=rangerOffset(10,Shovel:toWorld(vec(0,0,-25)),(holoPos(1)-Shovel:pos()))
+
+if(changed(owner():keyUse())&owner():aimEntity()==Shovel){
+    Shovel:propFreeze(0)
+}
+if(Shovel:isPlayerHolding()){
+    PickedUp=1
+}else{
+    PickedUp=0
+}
+if(PickedUp==1){
+    
+    #is touching ground
+    if(Ranger:distance()<9){
+        TouchingGround=1
+        
+    }else{
+        TouchingGround=0
+    }
+    if(changed(TouchingGround)&TouchingGround==1){
+        Shovel:emitSound(Digsounds[randint(1,Digsounds:count()),string])
+        TimesDigged+=1
+    }
+    if(TimesDigged==TimesNeeded){
+        TimesDigged=0
+        Chance=randint(1,10)
+        #logic ofr diffrent ores and objects
+        
+        #this is a mess...
+        
+        if(Chance==1){
+            Dirt=propSpawn(DirtModels[randint(1,DirtModels:count()),string],Shovel:toWorld(vec(0,0,-25)),Shovel:toWorld(ang()),0)
+            Dirt:setMaterial("nature/dirtfloor_mine001a")
+            Dirt:emitSound("buttons/combine_button1.wav")
+            printColor(vec(255),"[",vec(0,255,0),"Digged",vec(255),"]:",vec(255),"You digged up rock.")  
+        }
+        if(Chance==6){
+            Dirt=propSpawn(DirtModels[randint(1,DirtModels:count()),string],Shovel:toWorld(vec(0,0,-25)),Shovel:toWorld(ang()),0)
+            Dirt:setMaterial("models/player/shared/gold_player")
+            Dirt:setColor(vec(255,255,255))
+            Dirt:emitSound("buttons/button17.wav")
+            printColor(vec(255),"[",vec(0,255,0),"Digged",vec(255),"]:",vec(255),"You digged up gold!")         
+        }
+        if(Chance==8){
+            Dirt=propSpawn(DirtModels[randint(1,DirtModels:count()),string],Shovel:toWorld(vec(0,0,-25)),Shovel:toWorld(ang()),0)
+            Dirt:setMaterial("models/debug/debugwhite")
+            Dirt:setColor(vec(255/2,255/2,255))
+            Dirt:emitSound("buttons/button17.wav")
+            printColor(vec(255),"[",vec(0,255,0),"Digged",vec(255),"]:",vec(255),"You digged up a diamond!")         
+        }
+        if(Chance==4){
+            Dirt=propSpawn(DirtModels[randint(1,DirtModels:count()),string],Shovel:toWorld(vec(0,0,-25)),Shovel:toWorld(ang()),0)
+            Dirt:setMaterial("phoenix_storms/red")
+            Dirt:setColor(vec(255,255,255))
+            Dirt:emitSound("buttons/button17.wav")
+            printColor(vec(255),"[",vec(0,255,0),"Digged",vec(255),"]:",vec(255),"You digged up a ruby!")         
+        }
+        if(Chance==3){
+            Dirt=propSpawn("models/props_junk/Shoe001a.mdl",Shovel:toWorld(vec(0,0,-25)),Shovel:toWorld(ang()),0)
+            Dirt:emitSound("buttons/combine_button1.wav")
+            printColor(vec(255),"[",vec(0,255,0),"Digged",vec(255),"]:",vec(255),"You digged up shoe..")     
+        }
+        if(Chance==2){
+            Dirt=propSpawn("models/props_canal/mattpipe.mdl",Shovel:toWorld(vec(0,0,-25)),Shovel:toWorld(ang()),0)
+            Dirt:emitSound("buttons/combine_button1.wav")
+            printColor(vec(255),"[",vec(0,255,0),"Digged",vec(255),"]:",vec(255),"You digged up pipe.")     
+        }
+        if(Chance==5){
+            Dirt=propSpawn("models/Gibs/HGIBS.mdl",Shovel:toWorld(vec(0,0,-25)),Shovel:toWorld(ang()),0)
+            Dirt:emitSound("ambient/voices/m_scream1.wav")
+            printColor(vec(255),"[",vec(0,255,0),"Digged",vec(255),"]:",vec(255),"You digged up skull!")     
+        }
+        if(Chance==7){
+            Dirt=propSpawn(DirtModels[randint(1,DirtModels:count()),string],Shovel:toWorld(vec(0,0,-25)),Shovel:toWorld(ang()),0)
+            Dirt:setColor(vec(0))
+            Dirt:setMaterial("models/debug/debugwhite")
+            Dirt:emitSound("buttons/combine_button1.wav")
+            printColor(vec(255),"[",vec(0,255,0),"Digged",vec(255),"]:",vec(255),"You digged up coal.")     
+        }
+        if(Chance==9){
+            Dirt=propSpawn(DirtModels[randint(1,DirtModels:count()),string],Shovel:toWorld(vec(0,0,-25)),Shovel:toWorld(ang()),0)
+            Dirt:setColor(vec(184, 115, 51))
+            Dirt:setMaterial("models/debug/debugwhite")
+            Dirt:emitSound("buttons/combine_button1.wav")
+            printColor(vec(255),"[",vec(0,255,0),"Digged",vec(255),"]:",vec(255),"You digged up copper.")     
+        }
+        if(Chance==10){
+            printColor(vec(255),"[",vec(0,255,0),"Digged",vec(255),"]:",vec(255),"You digged up nothing.")     
+        }
+        I++
+        RocksExclude:insertEntity(I,Dirt)
+        TimesNeeded=randint(3,10)
+    }
+}
